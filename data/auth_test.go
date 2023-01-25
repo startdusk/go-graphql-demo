@@ -91,3 +91,8 @@ func TestRegisterInput_Validate(t *testing.T) {
 		})
 	}
 }
+
+func TestIsEmail(t *testing.T) {
+	require.True(t, IsEmail("123@gmail.com"))
+	require.False(t, IsEmail("123gmail.com"))
+}

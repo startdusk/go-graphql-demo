@@ -14,20 +14,41 @@ type AuthService struct {
 	mock.Mock
 }
 
-// Register provides a mock function with given fields: ctx, user
-func (_m *AuthService) Register(ctx context.Context, user data.User) (data.AuthResponse, error) {
-	ret := _m.Called(ctx, user)
+// Login provides a mock function with given fields: ctx, input
+func (_m *AuthService) Login(ctx context.Context, input data.LoginInput) (data.AuthResponse, error) {
+	ret := _m.Called(ctx, input)
 
 	var r0 data.AuthResponse
-	if rf, ok := ret.Get(0).(func(context.Context, data.User) data.AuthResponse); ok {
-		r0 = rf(ctx, user)
+	if rf, ok := ret.Get(0).(func(context.Context, data.LoginInput) data.AuthResponse); ok {
+		r0 = rf(ctx, input)
 	} else {
 		r0 = ret.Get(0).(data.AuthResponse)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, data.User) error); ok {
-		r1 = rf(ctx, user)
+	if rf, ok := ret.Get(1).(func(context.Context, data.LoginInput) error); ok {
+		r1 = rf(ctx, input)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Register provides a mock function with given fields: ctx, input
+func (_m *AuthService) Register(ctx context.Context, input data.RegisterInput) (data.AuthResponse, error) {
+	ret := _m.Called(ctx, input)
+
+	var r0 data.AuthResponse
+	if rf, ok := ret.Get(0).(func(context.Context, data.RegisterInput) data.AuthResponse); ok {
+		r0 = rf(ctx, input)
+	} else {
+		r0 = ret.Get(0).(data.AuthResponse)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, data.RegisterInput) error); ok {
+		r1 = rf(ctx, input)
 	} else {
 		r1 = ret.Error(1)
 	}

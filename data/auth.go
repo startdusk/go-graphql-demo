@@ -4,15 +4,14 @@ import (
 	"context"
 	"fmt"
 	"net/mail"
+	"regexp"
 	"strings"
 )
 
-type RegisterInput struct {
-	Username        string
-	Email           string
-	Password        string
-	ConfirmPassword string
-}
+var (
+	UsernameMinLength = 2
+	PasswordMinLength = 6
+)
 
 var NilAuthResponse AuthResponse
 
@@ -22,7 +21,15 @@ type AuthResponse struct {
 }
 
 type AuthService interface {
-	Register(ctx context.Context, user User) (AuthResponse, error)
+	Register(ctx context.Context, input RegisterInput) (AuthResponse, error)
+	Login(ctx context.Context, input LoginInput) (AuthResponse, error)
+}
+
+type RegisterInput struct {
+	Username        string
+	Email           string
+	Password        string
+	ConfirmPassword string
 }
 
 func (in *RegisterInput) Sanitize() {
@@ -31,11 +38,6 @@ func (in *RegisterInput) Sanitize() {
 	in.Password = strings.TrimSpace(in.Password)
 	in.ConfirmPassword = strings.TrimSpace(in.ConfirmPassword)
 }
-
-var (
-	UsernameMinLength = 2
-	PasswordMinLength = 6
-)
 
 func (in RegisterInput) Validate() error {
 	if len(in.Username) < UsernameMinLength {
@@ -55,4 +57,39 @@ func (in RegisterInput) Validate() error {
 	}
 
 	return nil
+}
+
+type LoginInput struct {
+	UsernameOrEmail string
+	Password        string
+}
+
+func (in *LoginInput) Sanitize() {
+	in.UsernameOrEmail = strings.TrimSpace(in.UsernameOrEmail)
+	in.Password = strings.TrimSpace(in.Password)
+}
+
+func (in LoginInput) Validate() error {
+	switch IsEmail(in.UsernameOrEmail) {
+	case true:
+		if _, err := mail.ParseAddress(in.UsernameOrEmail); err != nil {
+			return fmt.Errorf("%w: email not valid", ErrValidation)
+		}
+	case false:
+		if len(in.UsernameOrEmail) < UsernameMinLength {
+			return fmt.Errorf("%w: username not long enough, (%d) characters as least", ErrValidation, UsernameMinLength)
+		}
+	}
+
+	if len(in.Password) < PasswordMinLength {
+		return fmt.Errorf("%w: password not long enough, (%d) characters as least", ErrValidation, PasswordMinLength)
+	}
+
+	return nil
+}
+
+var emailRegexp = regexp.MustCompile(`\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*`)
+
+func IsEmail(email string) bool {
+	return emailRegexp.MatchString(email)
 }
