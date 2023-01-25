@@ -10,6 +10,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var enctyptPasswordCost = bcrypt.DefaultCost
+
 type AuthService struct {
 	userRepo data.UserRepo
 }
@@ -37,7 +39,7 @@ func (as *AuthService) Register(ctx context.Context, input data.RegisterInput) (
 		return data.NilAuthResponse, data.ErrEmailTaken
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), enctyptPasswordCost)
 	if err != nil {
 		return data.NilAuthResponse, fmt.Errorf("hashing password error: %w", err)
 	}

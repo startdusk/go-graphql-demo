@@ -6,10 +6,10 @@ import (
 	"testing"
 
 	"github.com/startdusk/twitter/data"
+	"github.com/startdusk/twitter/faker"
 	mocks "github.com/startdusk/twitter/mocks/data"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func TestAuthService_Register(t *testing.T) {
@@ -110,17 +110,13 @@ func TestAuthService_Login(t *testing.T) {
 		Password:        password,
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	require.NoError(t, err)
-	userPassword := string(hashedPassword)
-
 	t.Run("username can login", func(t *testing.T) {
 		var userRepo mocks.UserRepo
 		returnUser := data.User{
 			ID:       "user_id",
 			Username: "bob",
 			Email:    "bob@gmail.com",
-			Password: userPassword,
+			Password: faker.HashedPassword,
 		}
 		userRepo.On("GetByUsername", mock.Anything, mock.Anything).Return(returnUser, nil)
 
@@ -141,7 +137,7 @@ func TestAuthService_Login(t *testing.T) {
 			ID:       "user_id",
 			Username: "bob",
 			Email:    "bob@gmail.com",
-			Password: userPassword,
+			Password: faker.HashedPassword,
 		}
 		userRepo.On("GetByEmail", mock.Anything, mock.Anything).Return(returnUser, nil)
 
@@ -189,7 +185,7 @@ func TestAuthService_Login(t *testing.T) {
 			ID:       "user_id",
 			Username: "bob",
 			Email:    "bob@gmail.com",
-			Password: userPassword,
+			Password: faker.HashedPassword,
 		}
 		userRepo.On("GetByEmail", mock.Anything, mock.Anything).Return(returnUser, nil)
 
