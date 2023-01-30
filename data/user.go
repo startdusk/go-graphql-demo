@@ -11,6 +11,8 @@ var (
 	ErrEmailTaken    = errors.New("email has taken")
 )
 
+var NilUser User
+
 type User struct {
 	ID        string
 	Username  string

@@ -1,4 +1,4 @@
 package faker
 
 // HashedPassword == bcrypt.GenerateFromPassword([]byte("password"), enctyptPasswordCost)
-const HashedPassword = "$2a$10$YUKCkRbOtqHbfhZimf2t7ezIXn4s/vtMOK3sH7c7Uae7hQaw67Pbq"
+const HashedPassword = "$2a$04$6z7khNcvkT7MKXcMvcFuK.tF.oexRZNv61OtZZprBkZpBY/1LkIfO"

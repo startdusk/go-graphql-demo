@@ -15,7 +15,7 @@ func main() {
 		panic(err)
 	}
 	log.Printf("%+v\n", conf)
-	db, err := postgres.New(ctx, conf.Database.URL)
+	db, err := postgres.New(ctx, conf.Database.URL, 10)
 	if err != nil {
 		panic(err)
 	}

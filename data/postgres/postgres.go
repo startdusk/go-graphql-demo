@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"log"
+	"time"
 
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -21,19 +22,31 @@ type DB struct {
 
 // Example databaseURL
 // postgres://jack:secret@pg.example.com:5432/mydb?sslmode=verify-ca&pool_max_conns=10
-func New(ctx context.Context, databaseURL string) (*DB, error) {
+func New(ctx context.Context, databaseURL string, timeout time.Duration) (*DB, error) {
 	pool, err := pgxpool.New(ctx, databaseURL)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "cannot create a pgxpool")
 	}
-	if err := pool.Ping(ctx); err != nil {
-		return nil, err
-	}
+	ready := make(chan struct{})
+	go func() {
+		for {
+			if err := pool.Ping(ctx); err == nil {
+				close(ready)
+				return
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+	}()
 
-	return &DB{
-		Pool: pool,
-		URL:  databaseURL,
-	}, nil
+	select {
+	case <-ready:
+		return &DB{
+			Pool: pool,
+			URL:  databaseURL,
+		}, nil
+	case <-time.After(timeout * time.Second):
+		return nil, errors.New("database not ready")
+	}
 }
 
 //go:embed migrations/*.sql

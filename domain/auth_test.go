@@ -27,8 +27,8 @@ func TestAuthService_Register(t *testing.T) {
 			Username: "bob",
 			Email:    "bob@gmail.com",
 		}
-		userRepo.On("GetByUsername", mock.Anything, mock.Anything).Return(returnUser, nil)
-		userRepo.On("GetByEmail", mock.Anything, mock.Anything).Return(returnUser, nil)
+		userRepo.On("GetByUsername", mock.Anything, mock.Anything).Return(data.NilUser, nil)
+		userRepo.On("GetByEmail", mock.Anything, mock.Anything).Return(data.NilUser, nil)
 		userRepo.On("Create", mock.Anything, mock.Anything).Return(returnUser, nil)
 
 		as := NewAuthService(&userRepo)

@@ -30,12 +30,16 @@ func (as *AuthService) Register(ctx context.Context, input data.RegisterInput) (
 	}
 
 	// check if username is already taken
-	if _, err := as.userRepo.GetByUsername(ctx, input.Username); err != nil && !errors.Is(err, data.ErrNotFound) {
+	u1, err := as.userRepo.GetByUsername(ctx, input.Username)
+	if u1 != data.NilUser || (err != nil && !errors.Is(err, data.ErrNotFound)) {
+		log.Println(err)
 		return data.NilAuthResponse, data.ErrUsernameTaken
 	}
 
 	// check if email is already taken
-	if _, err := as.userRepo.GetByEmail(ctx, input.Email); err != nil && !errors.Is(err, data.ErrNotFound) {
+	u2, err := as.userRepo.GetByEmail(ctx, input.Email)
+	if u2 != data.NilUser || (err != nil && !errors.Is(err, data.ErrNotFound)) {
+		log.Println(err)
 		return data.NilAuthResponse, data.ErrEmailTaken
 	}
 
