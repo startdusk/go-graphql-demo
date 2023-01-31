@@ -8,6 +8,7 @@ import (
 
 type Config struct {
 	Database database
+	JWT      JWT
 }
 
 func New(filenames ...string) (*Config, error) {
@@ -19,9 +20,18 @@ func New(filenames ...string) (*Config, error) {
 		Database: database{
 			URL: os.Getenv("DATABASE_URL"),
 		},
+		JWT: JWT{
+			Secret: os.Getenv("JWT_SECRET"),
+			Issuer: os.Getenv("DOMAIN"),
+		},
 	}, nil
 }
 
 type database struct {
 	URL string
+}
+
+type JWT struct {
+	Secret string
+	Issuer string
 }

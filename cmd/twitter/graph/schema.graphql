@@ -1,0 +1,35 @@
+# https://gqlgen.com/reference/scalars/#time
+scalar Time
+
+type User {
+  id: ID!
+  username: String!
+  email: String!
+  createdAt: Time!
+}
+
+type AuthResponse {
+  accessToken: String!
+  user: User!
+}
+
+input RegisterInput {
+  username: String!
+  email: String!
+  password: String!
+  confirmPassword: String!
+}
+
+input LoginInput {
+  usernameOrEmail: String!
+  password: String!
+}
+
+type Query {
+  me: User
+}
+
+type Mutation {
+  register(input: RegisterInput!): AuthResponse!
+  login(input: LoginInput!): AuthResponse!
+}

@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/mail"
 	"regexp"
 	"strings"
@@ -15,9 +16,23 @@ var (
 
 var NilAuthResponse AuthResponse
 
+var NilAuthToken AuthToken
+
+type AuthToken struct {
+	ID  string
+	Sub string
+}
+
 type AuthResponse struct {
 	AccessToken string
 	User        User
+}
+
+type AuthTokenService interface {
+	CreateRefreshToken(ctx context.Context, user User, tokenID string) (string, error)
+	CreateAccessToken(ctx context.Context, user User) (string, error)
+	ParseTokenFromRequest(ctx context.Context, r *http.Request) (AuthToken, error)
+	ParseToken(ctx context.Context, payload string) (AuthToken, error)
 }
 
 type AuthService interface {

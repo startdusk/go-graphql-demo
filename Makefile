@@ -46,3 +46,6 @@ initdb:
 
 run:
 	go run ./cmd/twitter/...
+
+generate:
+	go get github.com/99designs/gqlgen && go generate ./...
