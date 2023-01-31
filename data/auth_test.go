@@ -85,9 +85,7 @@ func TestRegisterInput_Validate(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			err := c.input.Validate()
-			if err != nil {
-				require.ErrorIs(t, err, ErrValidation)
-			}
+			require.ErrorIs(t, err, c.err)
 		})
 	}
 }

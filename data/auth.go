@@ -57,7 +57,7 @@ func (in *RegisterInput) Sanitize() {
 
 func (in RegisterInput) Validate() error {
 	if len(in.Username) < UsernameMinLength {
-		return fmt.Errorf("%w: username not long enough, (%d) characters as least", ErrValidation, UsernameMinLength)
+		return fmt.Errorf("%w: username not long enough, (%d) characters at least", ErrValidation, UsernameMinLength)
 	}
 
 	if _, err := mail.ParseAddress(in.Email); err != nil {
@@ -65,7 +65,7 @@ func (in RegisterInput) Validate() error {
 	}
 
 	if len(in.Password) < PasswordMinLength {
-		return fmt.Errorf("%w: password not long enough, (%d) characters as least", ErrValidation, PasswordMinLength)
+		return fmt.Errorf("%w: password not long enough, (%d) characters at least", ErrValidation, PasswordMinLength)
 	}
 
 	if in.Password != in.ConfirmPassword {
@@ -93,12 +93,12 @@ func (in LoginInput) Validate() error {
 		}
 	case false:
 		if len(in.UsernameOrEmail) < UsernameMinLength {
-			return fmt.Errorf("%w: username not long enough, (%d) characters as least", ErrValidation, UsernameMinLength)
+			return fmt.Errorf("%w: username not long enough, (%d) characters at least", ErrValidation, UsernameMinLength)
 		}
 	}
 
 	if len(in.Password) < PasswordMinLength {
-		return fmt.Errorf("%w: password not long enough, (%d) characters as least", ErrValidation, PasswordMinLength)
+		return fmt.Errorf("%w: password not long enough, (%d) characters at least", ErrValidation, PasswordMinLength)
 	}
 
 	return nil
