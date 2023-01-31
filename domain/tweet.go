@@ -24,17 +24,17 @@ func (ts *TweetService) All(ctx context.Context) ([]data.Tweet, error) {
 }
 
 func (ts *TweetService) Create(ctx context.Context, input data.CreateTweetInput) (data.Tweet, error) {
-	_, err := shared.GetUserIDFromContext(ctx)
+	userID, err := shared.GetUserIDFromContext(ctx)
 	if err != nil {
 		return data.NilTweet, data.ErrUnauthenticated
 	}
-	return ts.tweetRepo.Create(ctx, input)
+	return ts.tweetRepo.Create(ctx, data.Tweet{Body: input.Body, UserID: userID})
 }
 
-func (ts *TweetService) GetByID(ctx context.Context, id string) (data.Tweet, error) {
-	_, err := shared.GetUserIDFromContext(ctx)
+func (ts *TweetService) GetByID(ctx context.Context, tweetID string) (data.Tweet, error) {
+	userID, err := shared.GetUserIDFromContext(ctx)
 	if err != nil {
 		return data.NilTweet, data.ErrUnauthenticated
 	}
-	return ts.tweetRepo.GetByID(ctx, id)
+	return ts.tweetRepo.GetByID(ctx, tweetID, userID)
 }

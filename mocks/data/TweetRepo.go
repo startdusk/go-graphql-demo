@@ -37,20 +37,20 @@ func (_m *TweetRepo) All(ctx context.Context) ([]data.Tweet, error) {
 	return r0, r1
 }
 
-// Create provides a mock function with given fields: ctx, input
-func (_m *TweetRepo) Create(ctx context.Context, input data.CreateTweetInput) (data.Tweet, error) {
-	ret := _m.Called(ctx, input)
+// Create provides a mock function with given fields: ctx, tweet
+func (_m *TweetRepo) Create(ctx context.Context, tweet data.Tweet) (data.Tweet, error) {
+	ret := _m.Called(ctx, tweet)
 
 	var r0 data.Tweet
-	if rf, ok := ret.Get(0).(func(context.Context, data.CreateTweetInput) data.Tweet); ok {
-		r0 = rf(ctx, input)
+	if rf, ok := ret.Get(0).(func(context.Context, data.Tweet) data.Tweet); ok {
+		r0 = rf(ctx, tweet)
 	} else {
 		r0 = ret.Get(0).(data.Tweet)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, data.CreateTweetInput) error); ok {
-		r1 = rf(ctx, input)
+	if rf, ok := ret.Get(1).(func(context.Context, data.Tweet) error); ok {
+		r1 = rf(ctx, tweet)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -58,20 +58,20 @@ func (_m *TweetRepo) Create(ctx context.Context, input data.CreateTweetInput) (d
 	return r0, r1
 }
 
-// GetByID provides a mock function with given fields: ctx, id
-func (_m *TweetRepo) GetByID(ctx context.Context, id string) (data.Tweet, error) {
-	ret := _m.Called(ctx, id)
+// GetByID provides a mock function with given fields: ctx, tweetID, userID
+func (_m *TweetRepo) GetByID(ctx context.Context, tweetID string, userID string) (data.Tweet, error) {
+	ret := _m.Called(ctx, tweetID, userID)
 
 	var r0 data.Tweet
-	if rf, ok := ret.Get(0).(func(context.Context, string) data.Tweet); ok {
-		r0 = rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) data.Tweet); ok {
+		r0 = rf(ctx, tweetID, userID)
 	} else {
 		r0 = ret.Get(0).(data.Tweet)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, id)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, tweetID, userID)
 	} else {
 		r1 = ret.Error(1)
 	}

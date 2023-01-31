@@ -86,7 +86,7 @@ func TestTweetService_GetByID(t *testing.T) {
 			Body:   "hello",
 			UserID: "user_id",
 		}
-		tweetRepo.On("GetByID", mock.Anything, mock.Anything).Return(returnTweet, nil)
+		tweetRepo.On("GetByID", mock.Anything, mock.Anything, mock.Anything).Return(returnTweet, nil)
 		tr := NewTweetService(&tweetRepo)
 
 		ctx := context.WithValue(context.Background(), shared.UserIDKey{}, "user_id")
