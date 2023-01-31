@@ -1,7 +1,17 @@
 package graph
 
-import "context"
+import (
+	"context"
+
+	"github.com/startdusk/twitter/data"
+	"github.com/startdusk/twitter/shared"
+)
 
 func (q *queryResolver) Me(ctx context.Context) (*User, error) {
-	panic("implement me")
+	userID, err := shared.GetUserIDFromContext(ctx)
+	if err != nil {
+		return nil, data.ErrUnauthenticated
+	}
+
+	return &User{ID: userID}, nil
 }

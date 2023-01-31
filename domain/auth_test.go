@@ -8,8 +8,8 @@ import (
 	"github.com/startdusk/twitter/data"
 	"github.com/startdusk/twitter/faker"
 	mocks "github.com/startdusk/twitter/mocks/data"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 )
 
 func TestAuthService_Register(t *testing.T) {
@@ -31,15 +31,40 @@ func TestAuthService_Register(t *testing.T) {
 		userRepo.On("GetByEmail", mock.Anything, mock.Anything).Return(data.NilUser, nil)
 		userRepo.On("Create", mock.Anything, mock.Anything).Return(returnUser, nil)
 
-		as := NewAuthService(&userRepo)
-		resp, err := as.Register(context.Background(), input)
-		require.NoError(t, err)
-		require.NotEmpty(t, resp.User.ID)
-		require.Equal(t, input.Email, resp.User.Email)
-		require.Equal(t, input.Username, resp.User.Username)
-		require.NotEmpty(t, resp.AccessToken)
+		var authTokenService mocks.AuthTokenService
+		authTokenService.On("CreateAccessToken", mock.Anything, mock.Anything).Return("a access token", nil)
 
-		require.True(t, userRepo.AssertExpectations(t))
+		as := NewAuthService(&userRepo, &authTokenService)
+		resp, err := as.Register(context.Background(), input)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, resp.User.ID)
+		assert.Equal(t, input.Email, resp.User.Email)
+		assert.Equal(t, input.Username, resp.User.Username)
+		assert.NotEmpty(t, resp.AccessToken)
+
+		userRepo.AssertExpectations(t)
+		authTokenService.AssertExpectations(t)
+	})
+
+	t.Run("cannot generate access token", func(t *testing.T) {
+		var userRepo mocks.UserRepo
+		returnUser := data.User{
+			ID:       "user_id",
+			Username: "bob",
+			Email:    "bob@gmail.com",
+		}
+		userRepo.On("GetByUsername", mock.Anything, mock.Anything).Return(data.NilUser, nil)
+		userRepo.On("GetByEmail", mock.Anything, mock.Anything).Return(data.NilUser, nil)
+		userRepo.On("Create", mock.Anything, mock.Anything).Return(returnUser, nil)
+
+		var authTokenService mocks.AuthTokenService
+		authTokenService.On("CreateAccessToken", mock.Anything, mock.Anything).Return("", errors.New("error"))
+
+		as := NewAuthService(&userRepo, &authTokenService)
+		resp, err := as.Register(context.Background(), input)
+		assert.Error(t, err)
+		assert.Equal(t, resp, data.NilAuthResponse)
+		assert.Equal(t, err, data.ErrGenAccessToken)
 	})
 
 	t.Run("username taken", func(t *testing.T) {
@@ -47,14 +72,19 @@ func TestAuthService_Register(t *testing.T) {
 		returnUser := data.User{}
 		userRepo.On("GetByUsername", mock.Anything, mock.Anything).Return(returnUser, data.ErrUsernameTaken)
 
-		as := NewAuthService(&userRepo)
-		_, err := as.Register(context.Background(), input)
-		require.Error(t, err)
-		require.Equal(t, err, data.ErrUsernameTaken)
+		var authTokenService mocks.AuthTokenService
 
-		require.True(t, userRepo.AssertNotCalled(t, "GetByEmail"))
-		require.True(t, userRepo.AssertNotCalled(t, "Create"))
-		require.True(t, userRepo.AssertExpectations(t))
+		as := NewAuthService(&userRepo, &authTokenService)
+		_, err := as.Register(context.Background(), input)
+		assert.Error(t, err)
+		assert.Equal(t, err, data.ErrUsernameTaken)
+
+		userRepo.AssertNotCalled(t, "GetByEmail")
+		userRepo.AssertNotCalled(t, "Create")
+		userRepo.AssertExpectations(t)
+
+		authTokenService.AssertNotCalled(t, "CreateAccessToken")
+		authTokenService.AssertExpectations(t)
 	})
 
 	t.Run("email taken", func(t *testing.T) {
@@ -63,13 +93,18 @@ func TestAuthService_Register(t *testing.T) {
 		userRepo.On("GetByUsername", mock.Anything, mock.Anything).Return(returnUser, nil)
 		userRepo.On("GetByEmail", mock.Anything, mock.Anything).Return(returnUser, data.ErrEmailTaken)
 
-		as := NewAuthService(&userRepo)
-		_, err := as.Register(context.Background(), input)
-		require.Error(t, err)
-		require.Equal(t, err, data.ErrEmailTaken)
+		var authTokenService mocks.AuthTokenService
 
-		require.True(t, userRepo.AssertNotCalled(t, "Create"))
-		require.True(t, userRepo.AssertExpectations(t))
+		as := NewAuthService(&userRepo, &authTokenService)
+		_, err := as.Register(context.Background(), input)
+		assert.Error(t, err)
+		assert.Equal(t, err, data.ErrEmailTaken)
+
+		userRepo.AssertNotCalled(t, "Create")
+		userRepo.AssertExpectations(t)
+
+		authTokenService.AssertNotCalled(t, "CreateAccessToken")
+		authTokenService.AssertExpectations(t)
 	})
 
 	t.Run("create error", func(t *testing.T) {
@@ -79,23 +114,33 @@ func TestAuthService_Register(t *testing.T) {
 		userRepo.On("GetByEmail", mock.Anything, mock.Anything).Return(returnUser, nil)
 		userRepo.On("Create", mock.Anything, mock.Anything).Return(returnUser, errors.New("create user error"))
 
-		as := NewAuthService(&userRepo)
-		_, err := as.Register(context.Background(), input)
-		require.Error(t, err)
+		var authTokenService mocks.AuthTokenService
 
-		require.True(t, userRepo.AssertExpectations(t))
+		as := NewAuthService(&userRepo, &authTokenService)
+		_, err := as.Register(context.Background(), input)
+		assert.Error(t, err)
+
+		userRepo.AssertExpectations(t)
+
+		authTokenService.AssertNotCalled(t, "CreateAccessToken")
+		authTokenService.AssertExpectations(t)
 	})
 
 	t.Run("invalid input", func(t *testing.T) {
 		var userRepo mocks.UserRepo
-		as := NewAuthService(&userRepo)
-		_, err := as.Register(context.Background(), data.RegisterInput{})
-		require.Error(t, err)
+		var authTokenService mocks.AuthTokenService
 
-		require.True(t, userRepo.AssertNotCalled(t, "GetByUsername"))
-		require.True(t, userRepo.AssertNotCalled(t, "GetByEmail"))
-		require.True(t, userRepo.AssertNotCalled(t, "Create"))
-		require.True(t, userRepo.AssertExpectations(t))
+		as := NewAuthService(&userRepo, &authTokenService)
+		_, err := as.Register(context.Background(), data.RegisterInput{})
+		assert.Error(t, err)
+
+		userRepo.AssertNotCalled(t, "GetByUsername")
+		userRepo.AssertNotCalled(t, "GetByEmail")
+		userRepo.AssertNotCalled(t, "Create")
+		userRepo.AssertExpectations(t)
+
+		authTokenService.AssertNotCalled(t, "CreateAccessToken")
+		authTokenService.AssertExpectations(t)
 	})
 }
 
@@ -120,15 +165,19 @@ func TestAuthService_Login(t *testing.T) {
 		}
 		userRepo.On("GetByUsername", mock.Anything, mock.Anything).Return(returnUser, nil)
 
-		as := NewAuthService(&userRepo)
-		resp, err := as.Login(context.Background(), usernameInput)
-		require.NoError(t, err)
-		require.NotEmpty(t, resp.User.ID)
-		require.Equal(t, usernameInput.UsernameOrEmail, resp.User.Username)
-		require.NotEmpty(t, resp.AccessToken)
+		var authTokenService mocks.AuthTokenService
+		authTokenService.On("CreateAccessToken", mock.Anything, mock.Anything).Return("a access token", nil)
 
-		require.True(t, userRepo.AssertNotCalled(t, "GetByEmail"))
-		require.True(t, userRepo.AssertExpectations(t))
+		as := NewAuthService(&userRepo, &authTokenService)
+		resp, err := as.Login(context.Background(), usernameInput)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, resp.User.ID)
+		assert.Equal(t, usernameInput.UsernameOrEmail, resp.User.Username)
+		assert.NotEmpty(t, resp.AccessToken)
+
+		userRepo.AssertNotCalled(t, "GetByEmail")
+		userRepo.AssertExpectations(t)
+		authTokenService.AssertExpectations(t)
 	})
 
 	t.Run("email can login", func(t *testing.T) {
@@ -141,28 +190,38 @@ func TestAuthService_Login(t *testing.T) {
 		}
 		userRepo.On("GetByEmail", mock.Anything, mock.Anything).Return(returnUser, nil)
 
-		as := NewAuthService(&userRepo)
-		resp, err := as.Login(context.Background(), emailInput)
-		require.NoError(t, err)
-		require.NotEmpty(t, resp.User.ID)
-		require.Equal(t, emailInput.UsernameOrEmail, resp.User.Email)
-		require.NotEmpty(t, resp.AccessToken)
+		var authTokenService mocks.AuthTokenService
+		authTokenService.On("CreateAccessToken", mock.Anything, mock.Anything).Return("a access token", nil)
 
-		require.True(t, userRepo.AssertNotCalled(t, "GetByUsername"))
-		require.True(t, userRepo.AssertExpectations(t))
+		as := NewAuthService(&userRepo, &authTokenService)
+		resp, err := as.Login(context.Background(), emailInput)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, resp.User.ID)
+		assert.Equal(t, emailInput.UsernameOrEmail, resp.User.Email)
+		assert.NotEmpty(t, resp.AccessToken)
+
+		userRepo.AssertNotCalled(t, "GetByUsername")
+		userRepo.AssertExpectations(t)
+
+		authTokenService.AssertExpectations(t)
 	})
 
 	t.Run("user not found", func(t *testing.T) {
 		var userRepo mocks.UserRepo
 		returnUser := data.User{}
 		userRepo.On("GetByEmail", mock.Anything, mock.Anything).Return(returnUser, data.ErrNotFound)
-		as := NewAuthService(&userRepo)
-		_, err := as.Login(context.Background(), emailInput)
-		require.Error(t, err)
-		require.Equal(t, err, data.ErrBadCredentials)
+		var authTokenService mocks.AuthTokenService
 
-		require.True(t, userRepo.AssertNotCalled(t, "GetByUsername"))
-		require.True(t, userRepo.AssertExpectations(t))
+		as := NewAuthService(&userRepo, &authTokenService)
+		_, err := as.Login(context.Background(), emailInput)
+		assert.Error(t, err)
+		assert.Equal(t, err, data.ErrBadCredentials)
+
+		userRepo.AssertNotCalled(t, "GetByUsername")
+		userRepo.AssertExpectations(t)
+
+		authTokenService.AssertNotCalled(t, "CreateAccessToken")
+		authTokenService.AssertExpectations(t)
 	})
 
 	t.Run("internal error", func(t *testing.T) {
@@ -170,13 +229,18 @@ func TestAuthService_Login(t *testing.T) {
 		returnUser := data.User{}
 		expectedErr := errors.New("internal error")
 		userRepo.On("GetByEmail", mock.Anything, mock.Anything).Return(returnUser, expectedErr)
-		as := NewAuthService(&userRepo)
-		_, err := as.Login(context.Background(), emailInput)
-		require.Error(t, err)
-		require.Equal(t, err, expectedErr)
+		var authTokenService mocks.AuthTokenService
 
-		require.True(t, userRepo.AssertNotCalled(t, "GetByUsername"))
-		require.True(t, userRepo.AssertExpectations(t))
+		as := NewAuthService(&userRepo, &authTokenService)
+		_, err := as.Login(context.Background(), emailInput)
+		assert.Error(t, err)
+		assert.Equal(t, err, expectedErr)
+
+		userRepo.AssertNotCalled(t, "GetByUsername")
+		userRepo.AssertExpectations(t)
+
+		authTokenService.AssertNotCalled(t, "CreateAccessToken")
+		authTokenService.AssertExpectations(t)
 	})
 
 	t.Run("user password error", func(t *testing.T) {
@@ -190,23 +254,33 @@ func TestAuthService_Login(t *testing.T) {
 		userRepo.On("GetByEmail", mock.Anything, mock.Anything).Return(returnUser, nil)
 
 		emailInput.Password = "invalid password"
-		as := NewAuthService(&userRepo)
-		_, err := as.Login(context.Background(), emailInput)
-		require.Error(t, err)
-		require.Equal(t, err, data.ErrBadCredentials)
+		var authTokenService mocks.AuthTokenService
 
-		require.True(t, userRepo.AssertNotCalled(t, "GetByUsername"))
-		require.True(t, userRepo.AssertExpectations(t))
+		as := NewAuthService(&userRepo, &authTokenService)
+		_, err := as.Login(context.Background(), emailInput)
+		assert.Error(t, err)
+		assert.Equal(t, err, data.ErrBadCredentials)
+
+		userRepo.AssertNotCalled(t, "GetByUsername")
+		userRepo.AssertExpectations(t)
+
+		authTokenService.AssertNotCalled(t, "CreateAccessToken")
+		authTokenService.AssertExpectations(t)
 	})
 
 	t.Run("invalid input", func(t *testing.T) {
 		var userRepo mocks.UserRepo
-		as := NewAuthService(&userRepo)
-		_, err := as.Login(context.Background(), data.LoginInput{})
-		require.Error(t, err)
+		var authTokenService mocks.AuthTokenService
 
-		require.True(t, userRepo.AssertNotCalled(t, "GetByUsername"))
-		require.True(t, userRepo.AssertNotCalled(t, "GetByEmail"))
-		require.True(t, userRepo.AssertExpectations(t))
+		as := NewAuthService(&userRepo, &authTokenService)
+		_, err := as.Login(context.Background(), data.LoginInput{})
+		assert.Error(t, err)
+
+		userRepo.AssertNotCalled(t, "GetByUsername")
+		userRepo.AssertNotCalled(t, "GetByEmail")
+		userRepo.AssertExpectations(t)
+
+		authTokenService.AssertNotCalled(t, "CreateAccessToken")
+		authTokenService.AssertExpectations(t)
 	})
 }

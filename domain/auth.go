@@ -13,12 +13,14 @@ import (
 var enctyptPasswordCost = bcrypt.DefaultCost
 
 type AuthService struct {
-	userRepo data.UserRepo
+	authTokenService data.AuthTokenService
+	userRepo         data.UserRepo
 }
 
-func NewAuthService(ur data.UserRepo) *AuthService {
+func NewAuthService(ur data.UserRepo, ats data.AuthTokenService) *AuthService {
 	return &AuthService{
-		userRepo: ur,
+		authTokenService: ats,
+		userRepo:         ur,
 	}
 }
 
@@ -58,8 +60,17 @@ func (as *AuthService) Register(ctx context.Context, input data.RegisterInput) (
 		return data.NilAuthResponse, fmt.Errorf("create user error: %w", err)
 	}
 
-	// TODO: gen accessToken
-	accessToken := "access token"
+	accessToken, err := as.authTokenService.CreateAccessToken(ctx, user)
+	if err != nil {
+		log.Printf("%+v", err)
+		return data.NilAuthResponse, data.ErrGenAccessToken
+	}
+
+	// refreshToken, err := as.authTokenService.CreateRefreshToken(ctx, user)
+	// if err != nil {
+	// 	log.Printf("%+v", err)
+	// 	return data.NilAuthResponse, data.ErrGenRefreshToken
+	// }
 
 	return data.AuthResponse{
 		AccessToken: accessToken,
@@ -95,11 +106,21 @@ func (as *AuthService) Login(ctx context.Context, input data.LoginInput) (data.A
 		return data.NilAuthResponse, data.ErrBadCredentials
 	}
 
-	// TODO: gen accessToken
-	accessToken := "access token"
+	accessToken, err := as.authTokenService.CreateAccessToken(ctx, user)
+	if err != nil {
+		log.Printf("%+v", err)
+		return data.NilAuthResponse, data.ErrGenAccessToken
+	}
+
+	// refreshToken, err := as.authTokenService.CreateRefreshToken(ctx, user, )
+	// if err != nil {
+	// 	log.Printf("%+v", err)
+	// 	return data.NilAuthResponse, data.ErrGenRefreshToken
+	// }
 
 	return data.AuthResponse{
 		AccessToken: accessToken,
-		User:        user,
-	}, nil
+		// RefreshToken: refreshToken,
+		User: user,
+	}, err
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/startdusk/twitter/config"
 	"github.com/startdusk/twitter/data/postgres"
 	"github.com/startdusk/twitter/domain"
+	"github.com/startdusk/twitter/jwt"
 )
 
 func main() {
@@ -29,10 +30,13 @@ func main() {
 	if err := db.Migrate(); err != nil {
 		panic(err)
 	}
+
+	tokenService := jwt.NewTokenService(&conf.JWT)
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(requestid.New())
 	router.Use(gin.Recovery())
+	router.Use(authMiddleware(tokenService))
 	router.GET("/", func(ctx *gin.Context) {
 		playground.Handler("Twitter clone", "/query").ServeHTTP(ctx.Writer, ctx.Request)
 	})
@@ -41,7 +45,7 @@ func main() {
 			Resolvers: &graph.Resolver{
 				AuthService: domain.NewAuthService(&postgres.UserRepo{
 					DB: db,
-				}),
+				}, jwt.NewTokenService(&conf.JWT)),
 			},
 			Directives: graph.DirectiveRoot{},
 			Complexity: graph.ComplexityRoot{},

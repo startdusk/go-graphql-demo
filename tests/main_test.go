@@ -6,9 +6,11 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/startdusk/twitter/config"
 	"github.com/startdusk/twitter/data"
 	"github.com/startdusk/twitter/data/postgres"
 	"github.com/startdusk/twitter/domain"
+	"github.com/startdusk/twitter/jwt"
 )
 
 var (
@@ -35,6 +37,10 @@ func StopDB(c *Container) {
 }
 
 func TestMain(m *testing.M) {
+	conf, err := config.New("../.env.test")
+	if err != nil {
+		panic(err)
+	}
 	ctx := context.Background()
 	dbname := uuid.NewString()
 	container, err := StartDB(dbname)
@@ -62,7 +68,9 @@ func TestMain(m *testing.M) {
 	userRepo = &postgres.UserRepo{
 		DB: db,
 	}
-	authService = domain.NewAuthService(userRepo)
+
+	authTokenService := jwt.NewTokenService(&conf.JWT)
+	authService = domain.NewAuthService(userRepo, authTokenService)
 
 	m.Run()
 }

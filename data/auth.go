@@ -24,8 +24,9 @@ type AuthToken struct {
 }
 
 type AuthResponse struct {
-	AccessToken string
-	User        User
+	AccessToken  string
+	RefreshToken string
+	User         User
 }
 
 type AuthTokenService interface {
