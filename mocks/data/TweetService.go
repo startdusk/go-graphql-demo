@@ -58,6 +58,27 @@ func (_m *TweetService) Create(ctx context.Context, input data.CreateTweetInput)
 	return r0, r1
 }
 
+// CreateReply provides a mock function with given fields: ctx, parentID, input
+func (_m *TweetService) CreateReply(ctx context.Context, parentID string, input data.CreateTweetInput) (data.Tweet, error) {
+	ret := _m.Called(ctx, parentID, input)
+
+	var r0 data.Tweet
+	if rf, ok := ret.Get(0).(func(context.Context, string, data.CreateTweetInput) data.Tweet); ok {
+		r0 = rf(ctx, parentID, input)
+	} else {
+		r0 = ret.Get(0).(data.Tweet)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, data.CreateTweetInput) error); ok {
+		r1 = rf(ctx, parentID, input)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Delete provides a mock function with given fields: ctx, tweetID
 func (_m *TweetService) Delete(ctx context.Context, tweetID string) error {
 	ret := _m.Called(ctx, tweetID)

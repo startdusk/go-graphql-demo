@@ -46,5 +46,6 @@ type Mutation {
   register(input: RegisterInput!): AuthResponse!
   login(input: LoginInput!): AuthResponse!
   createTweet(input: CreatedTweetInput!): Tweet!
+  createReply(parentId: ID!, input: CreatedTweetInput!): Tweet!
   deleteTweet(id: ID!): Boolean!
 }

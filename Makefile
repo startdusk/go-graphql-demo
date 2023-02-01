@@ -2,29 +2,35 @@ include .env
 
 .PHONY: mock
 mock:
-	mockery --all --keeptree
+	@mockery --all --keeptree
 
 .PHONY: test
 test: clean
-	go test ./...
+	@go test ./...
 
 .PHONY: clean
 clean:
-	go mod tidy
-	go vet ./...
-	go fmt ./...
+	@go mod tidy
+	@go vet ./...
+	@go fmt ./...
 
 MIGRATE_SOURCE=file://data/postgres/migrations
 
 .PHONY: migrate
 migrate:
-	migrate -source ${MIGRATE_SOURCE} \
+	@migrate -source ${MIGRATE_SOURCE} \
 			-database ${DATABASE_URL} up
 
 .PHONY: rollback
 rollback:
-	migrate -source ${MIGRATE_SOURCE} \
-			-database ${DATABASE_URL} down
+	@migrate -source ${MIGRATE_SOURCE} \
+			-database ${DATABASE_URL} down 1
+
+
+.PHONY: drop
+drop:
+	@migrate -source ${MIGRATE_SOURCE} \
+			-database ${DATABASE_URL} drop
 
 .PHONY: migration
 migration:

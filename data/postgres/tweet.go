@@ -27,10 +27,10 @@ func (tr *TweetRepo) All(ctx context.Context) ([]data.Tweet, error) {
 
 func (tr *TweetRepo) Create(ctx context.Context, tweet data.Tweet) (data.Tweet, error) {
 	const q = `
-		INSERT INTO tweets (body, user_id) VALUES ($1, $2) RETURNING *
+		INSERT INTO tweets (body, user_id, parent_id) VALUES ($1, $2, $3) RETURNING *
 	`
 	var t data.Tweet
-	err := pgxscan.Get(ctx, tr.DB.Pool, &t, q, tweet.Body, tweet.UserID)
+	err := pgxscan.Get(ctx, tr.DB.Pool, &t, q, tweet.Body, tweet.UserID, tweet.ParentID)
 	return t, err
 }
 

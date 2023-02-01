@@ -41,6 +41,21 @@ func (m *mutationResolver) DeleteTweet(ctx context.Context, tweetID string) (boo
 	return err == nil, err
 }
 
+func (m *mutationResolver) CreateReply(ctx context.Context, parentID string, input CreatedTweetInput) (*Tweet, error) {
+	t, err := m.TweetService.CreateReply(ctx, parentID, data.CreateTweetInput{
+		Body: input.Body,
+	})
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrUnauthenticated):
+			return nil, writeUnauthenticatedError(ctx, err)
+		default:
+			return nil, err
+		}
+	}
+	return mapToTweet(t), err
+}
+
 func (t *tweetResolver) User(ctx context.Context, obj *Tweet) (*User, error) {
 	// 使用loder 加载数据到内存, 减少sql查询次数
 	return DataloaderFor(ctx).UserByID.Load(obj.UserID)
