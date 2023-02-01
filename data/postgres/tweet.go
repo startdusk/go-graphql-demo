@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/startdusk/twitter/data"
@@ -17,7 +18,7 @@ func NewTweetRepo(db *DB) *TweetRepo {
 
 func (tr *TweetRepo) All(ctx context.Context) ([]data.Tweet, error) {
 	const q = `
-		SELECT * FROM tweets
+		SELECT * FROM tweets ORDER BY created_at DESC
 	`
 	var ts []data.Tweet
 	err := pgxscan.Select(ctx, tr.DB.Pool, &ts, q)
@@ -33,11 +34,16 @@ func (tr *TweetRepo) Create(ctx context.Context, tweet data.Tweet) (data.Tweet, 
 	return t, err
 }
 
-func (tr *TweetRepo) GetByID(ctx context.Context, userID, tweetID string) (data.Tweet, error) {
+func (tr *TweetRepo) GetByID(ctx context.Context, tweetID string) (data.Tweet, error) {
 	const q = `
-		SELECT * FROM tweets WHERE id=$1 AND user_id=$2 LIMIT 1
+		SELECT * FROM tweets WHERE id = $1 LIMIT 1
 	`
 	var t data.Tweet
-	err := pgxscan.Get(ctx, tr.DB.Pool, &t, q, tweetID, userID)
-	return t, err
+	if err := pgxscan.Get(ctx, tr.DB.Pool, &t, q, tweetID); err != nil {
+		if pgxscan.NotFound(err) {
+			return data.NilTweet, data.ErrNotFound
+		}
+		return data.NilTweet, fmt.Errorf("select tweets by id=%s error: %w", tweetID, err)
+	}
+	return t, nil
 }

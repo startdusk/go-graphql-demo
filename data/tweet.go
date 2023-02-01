@@ -50,5 +50,5 @@ type TweetService interface {
 type TweetRepo interface {
 	All(ctx context.Context) ([]Tweet, error)
 	Create(ctx context.Context, tweet Tweet) (Tweet, error)
-	GetByID(ctx context.Context, tweetID, userID string) (Tweet, error)
+	GetByID(ctx context.Context, tweetID string) (Tweet, error)
 }

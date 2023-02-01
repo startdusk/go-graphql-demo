@@ -58,20 +58,20 @@ func (_m *TweetRepo) Create(ctx context.Context, tweet data.Tweet) (data.Tweet, 
 	return r0, r1
 }
 
-// GetByID provides a mock function with given fields: ctx, tweetID, userID
-func (_m *TweetRepo) GetByID(ctx context.Context, tweetID string, userID string) (data.Tweet, error) {
-	ret := _m.Called(ctx, tweetID, userID)
+// GetByID provides a mock function with given fields: ctx, tweetID
+func (_m *TweetRepo) GetByID(ctx context.Context, tweetID string) (data.Tweet, error) {
+	ret := _m.Called(ctx, tweetID)
 
 	var r0 data.Tweet
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) data.Tweet); ok {
-		r0 = rf(ctx, tweetID, userID)
+	if rf, ok := ret.Get(0).(func(context.Context, string) data.Tweet); ok {
+		r0 = rf(ctx, tweetID)
 	} else {
 		r0 = ret.Get(0).(data.Tweet)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
-		r1 = rf(ctx, tweetID, userID)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, tweetID)
 	} else {
 		r1 = ret.Error(1)
 	}

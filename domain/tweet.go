@@ -3,6 +3,7 @@ package domain
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/startdusk/twitter/data"
 	"github.com/startdusk/twitter/shared"
 )
@@ -28,13 +29,18 @@ func (ts *TweetService) Create(ctx context.Context, input data.CreateTweetInput)
 	if err != nil {
 		return data.NilTweet, data.ErrUnauthenticated
 	}
+	input.Sanitize()
+	if err := input.Validate(); err != nil {
+		return data.NilTweet, err
+	}
+
 	return ts.tweetRepo.Create(ctx, data.Tweet{Body: input.Body, UserID: userID})
 }
 
 func (ts *TweetService) GetByID(ctx context.Context, tweetID string) (data.Tweet, error) {
-	userID, err := shared.GetUserIDFromContext(ctx)
-	if err != nil {
-		return data.NilTweet, data.ErrUnauthenticated
+	if _, err := uuid.Parse(tweetID); err != nil {
+		return data.NilTweet, data.ErrInvalidUUID
 	}
-	return ts.tweetRepo.GetByID(ctx, tweetID, userID)
+
+	return ts.tweetRepo.GetByID(ctx, tweetID)
 }

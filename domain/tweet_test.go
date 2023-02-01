@@ -15,7 +15,7 @@ func TestTweetService_All(t *testing.T) {
 	t.Run("can get all tweets", func(t *testing.T) {
 		var tweetRepo mocks.TweetRepo
 		returnTweets := []data.Tweet{{
-			ID:     "1",
+			ID:     "171046a0-a81f-473f-b8a5-d0f8e9e832be",
 			Body:   "hello",
 			UserID: "user_id",
 		}}
@@ -46,7 +46,7 @@ func TestTweetService_Create(t *testing.T) {
 	t.Run("can create tweet", func(t *testing.T) {
 		var tweetRepo mocks.TweetRepo
 		returnTweet := data.Tweet{
-			ID:     "1",
+			ID:     "44bad1d3-946a-4869-aed0-bdc5e3e14c93",
 			Body:   "hello",
 			UserID: "user_id",
 		}
@@ -80,7 +80,7 @@ func TestTweetService_Create(t *testing.T) {
 func TestTweetService_GetByID(t *testing.T) {
 	t.Run("can get a tweet by id", func(t *testing.T) {
 		var tweetRepo mocks.TweetRepo
-		tweetID := "1"
+		tweetID := "3d73c595-b771-4be1-9328-82e1cb93b350"
 		returnTweet := data.Tweet{
 			ID:     tweetID,
 			Body:   "hello",
@@ -95,14 +95,14 @@ func TestTweetService_GetByID(t *testing.T) {
 		assert.Equal(t, tweet, returnTweet)
 	})
 
-	t.Run("not auth user cannot get a tweet by id", func(t *testing.T) {
+	t.Run("invalid tweet id", func(t *testing.T) {
 		var tweetRepo mocks.TweetRepo
-		tweetID := "1"
+		tweetID := "xxx"
 		tr := NewTweetService(&tweetRepo)
 
 		ctx := context.Background()
 		tweet, err := tr.GetByID(ctx, tweetID)
-		assert.ErrorIs(t, err, data.ErrUnauthenticated)
+		assert.ErrorIs(t, err, data.ErrInvalidUUID)
 		assert.Equal(t, tweet, data.NilTweet)
 
 		tweetRepo.AssertNotCalled(t, "GetByID")
