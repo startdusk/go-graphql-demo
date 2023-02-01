@@ -100,10 +100,17 @@ func TestTweetService_Delete(t *testing.T) {
 	t.Run("can delete tweet", func(t *testing.T) {
 		var tweetRepo mocks.TweetRepo
 		tweetID := "3d73c595-b771-4be1-9328-82e1cb93b350"
+		userID := "user_id"
+		returnTweet := data.Tweet{
+			ID:     tweetID,
+			Body:   "hello",
+			UserID: userID,
+		}
+		tweetRepo.On("GetByID", mock.Anything, mock.Anything).Return(returnTweet, nil)
 		tweetRepo.On("Delete", mock.Anything, mock.Anything).Return(nil)
 		tr := NewTweetService(&tweetRepo)
 
-		ctx := context.WithValue(context.Background(), shared.UserIDKey{}, "user_id")
+		ctx := context.WithValue(context.Background(), shared.UserIDKey{}, userID)
 		err := tr.Delete(ctx, tweetID)
 		assert.NoError(t, err)
 	})

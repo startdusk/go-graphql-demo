@@ -42,13 +42,22 @@ func (ts *TweetService) GetByID(ctx context.Context, tweetID string) (data.Tweet
 }
 
 func (ts *TweetService) Delete(ctx context.Context, tweetID string) error {
-	_, err := shared.GetUserIDFromContext(ctx)
+	curUserID, err := shared.GetUserIDFromContext(ctx)
 	if err != nil {
 		return data.ErrUnauthenticated
 	}
 
 	if _, err := uuid.Parse(tweetID); err != nil {
 		return data.ErrInvalidUUID
+	}
+
+	tweet, err := ts.GetByID(ctx, tweetID)
+	if err != nil {
+		return err
+	}
+
+	if !tweet.CanDelete(curUserID) {
+		return data.ErrForbidden
 	}
 
 	return ts.tweetRepo.Delete(ctx, tweetID)

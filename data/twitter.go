@@ -12,4 +12,5 @@ var (
 	ErrNoUserIDInContext = errors.New("no user id in context")
 	ErrUnauthenticated   = errors.New("unauthenticated")
 	ErrInvalidUUID       = errors.New("invalid uuid")
+	ErrForbidden         = errors.New("forbidden")
 )

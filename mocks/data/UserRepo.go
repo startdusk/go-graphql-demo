@@ -56,6 +56,50 @@ func (_m *UserRepo) GetByEmail(ctx context.Context, email string) (data.User, er
 	return r0, r1
 }
 
+// GetByID provides a mock function with given fields: ctx, id
+func (_m *UserRepo) GetByID(ctx context.Context, id string) (data.User, error) {
+	ret := _m.Called(ctx, id)
+
+	var r0 data.User
+	if rf, ok := ret.Get(0).(func(context.Context, string) data.User); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Get(0).(data.User)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetByIDs provides a mock function with given fields: ctx, ids
+func (_m *UserRepo) GetByIDs(ctx context.Context, ids []string) ([]data.User, error) {
+	ret := _m.Called(ctx, ids)
+
+	var r0 []data.User
+	if rf, ok := ret.Get(0).(func(context.Context, []string) []data.User); ok {
+		r0 = rf(ctx, ids)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]data.User)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, []string) error); ok {
+		r1 = rf(ctx, ids)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetByUsername provides a mock function with given fields: ctx, username
 func (_m *UserRepo) GetByUsername(ctx context.Context, username string) (data.User, error) {
 	ret := _m.Called(ctx, username)

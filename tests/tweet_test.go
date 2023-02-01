@@ -91,6 +91,15 @@ func TestTweetService_Lifecycle(t *testing.T) {
 			},
 		},
 		{
+			name: "cannot delete tweet",
+			op: func() (data.Tweet, error) {
+				ctx := context.WithValue(context.Background(), shared.UserIDKey{}, "bad_user_id")
+				return data.NilTweet, tweetService.Delete(ctx, initTweet.ID)
+			},
+			wantErr: true,
+			err:     data.ErrForbidden,
+		},
+		{
 			name: "can delete tweet",
 			op: func() (data.Tweet, error) {
 				return data.NilTweet, tweetService.Delete(ctx, initTweet.ID)

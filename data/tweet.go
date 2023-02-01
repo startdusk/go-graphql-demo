@@ -41,6 +41,14 @@ type Tweet struct {
 	UpdatedAt time.Time
 }
 
+func (t Tweet) CanDelete(userID string) bool {
+	return t.UserID == userID
+}
+
+// func (t Tweet) CanUpdate(userID string) bool {
+// 	return t.UserID == userID
+// }
+
 type TweetService interface {
 	All(ctx context.Context) ([]Tweet, error)
 	Create(ctx context.Context, input CreateTweetInput) (Tweet, error)

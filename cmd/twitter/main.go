@@ -35,22 +35,26 @@ func main() {
 		panic(err)
 	}
 
+	userRepo := postgres.UserRepo{DB: db}
+	twetRepo := postgres.TweetRepo{DB: db}
 	tokenService := jwt.NewTokenService(&conf.JWT)
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(requestid.New())
 	router.Use(gin.Recovery())
 	router.Use(authMiddleware(tokenService))
+	router.Use(graph.DataloaderMiddleware(&graph.Repos{
+		UserRepo: &userRepo,
+	}))
 	router.GET("/", func(ctx *gin.Context) {
 		playground.Handler("Twitter clone", "/query").ServeHTTP(ctx.Writer, ctx.Request)
 	})
 	router.POST("/query", func(ctx *gin.Context) {
 		handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
 			Resolvers: &graph.Resolver{
-				AuthService: domain.NewAuthService(&postgres.UserRepo{
-					DB: db,
-				}, jwt.NewTokenService(&conf.JWT)),
-				TweetService: domain.NewTweetService(&postgres.TweetRepo{DB: db}),
+				AuthService:  domain.NewAuthService(&userRepo, tokenService),
+				TweetService: domain.NewTweetService(&twetRepo),
+				UserService:  domain.NewUserService(&userRepo),
 			},
 			Directives: graph.DirectiveRoot{},
 			Complexity: graph.ComplexityRoot{},

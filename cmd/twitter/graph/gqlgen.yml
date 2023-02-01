@@ -1,3 +1,9 @@
 # https://gqlgen.com/config/
 
 skip_validation: true
+
+models:
+  Tweet:
+    fields:
+      user:
+        resolver: true

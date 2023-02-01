@@ -36,6 +36,21 @@ func (m *mutationResolver) CreateTweet(ctx context.Context, input CreatedTweetIn
 	return mapToTweet(t), err
 }
 
+func (m *mutationResolver) DeleteTweet(ctx context.Context, tweetID string) (bool, error) {
+	err := m.TweetService.Delete(ctx, tweetID)
+	return err == nil, err
+}
+
+func (t *tweetResolver) User(ctx context.Context, obj *Tweet) (*User, error) {
+	// 使用loder 加载数据到内存, 减少sql查询次数
+	return DataloaderFor(ctx).UserByID.Load(obj.UserID)
+	// user, err := t.UserService.GetByID(ctx, obj.UserID)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// return mapToUser(user), err
+}
+
 func mapToTweet(t data.Tweet) *Tweet {
 	return &Tweet{
 		ID:        t.ID,

@@ -15,3 +15,12 @@ func (q *queryResolver) Me(ctx context.Context) (*User, error) {
 
 	return &User{ID: userID}, nil
 }
+
+func mapToUser(user data.User) *User {
+	return &User{
+		ID:        user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+	}
+}

@@ -37,6 +37,27 @@ func (_m *MutationResolver) CreateTweet(ctx context.Context, input graph.Created
 	return r0, r1
 }
 
+// DeleteTweet provides a mock function with given fields: ctx, id
+func (_m *MutationResolver) DeleteTweet(ctx context.Context, id string) (bool, error) {
+	ret := _m.Called(ctx, id)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Login provides a mock function with given fields: ctx, input
 func (_m *MutationResolver) Login(ctx context.Context, input graph.LoginInput) (*graph.AuthResponse, error) {
 	ret := _m.Called(ctx, input)
