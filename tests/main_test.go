@@ -15,7 +15,8 @@ import (
 
 var (
 	authService data.AuthService
-	userRepo    data.UserRepo
+
+	tweetService data.TweetService
 )
 
 // StartDB starts a database instance.
@@ -65,12 +66,15 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	userRepo = &postgres.UserRepo{
+	userRepo := &postgres.UserRepo{
+		DB: db,
+	}
+	tweetRepo := &postgres.TweetRepo{
 		DB: db,
 	}
 
 	authTokenService := jwt.NewTokenService(&conf.JWT)
 	authService = domain.NewAuthService(userRepo, authTokenService)
-
+	tweetService = domain.NewTweetService(tweetRepo)
 	m.Run()
 }
