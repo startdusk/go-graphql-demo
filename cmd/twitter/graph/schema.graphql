@@ -8,6 +8,13 @@ type User {
   createdAt: Time!
 }
 
+type Tweet {
+  id: ID!
+  body: String!
+  userId: ID!
+  createdAt: Time!
+}
+
 type AuthResponse {
   accessToken: String!
   user: User!
@@ -25,11 +32,18 @@ input LoginInput {
   password: String!
 }
 
+input CreatedTweetInput {
+  body: String!
+}
+
 type Query {
   me: User
+  tweets: [Tweet!]!
 }
 
 type Mutation {
   register(input: RegisterInput!): AuthResponse!
   login(input: LoginInput!): AuthResponse!
+  createTweet(input: CreatedTweetInput!): Tweet!
+  
 }

@@ -4,6 +4,9 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -17,7 +20,8 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 	conf, err := config.New()
 	if err != nil {
 		panic(err)
@@ -46,12 +50,35 @@ func main() {
 				AuthService: domain.NewAuthService(&postgres.UserRepo{
 					DB: db,
 				}, jwt.NewTokenService(&conf.JWT)),
+				TweetService: domain.NewTweetService(&postgres.TweetRepo{DB: db}),
 			},
 			Directives: graph.DirectiveRoot{},
 			Complexity: graph.ComplexityRoot{},
 		})).ServeHTTP(ctx.Writer, ctx.Request)
 	})
 
-	log.Println("run it success")
-	log.Fatal(http.ListenAndServe(":8888", router))
+	srv := &http.Server{
+		Addr:    ":8888",
+		Handler: router,
+	}
+
+	go func() {
+		log.Println("run it success")
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+
+	<-ctx.Done()
+
+	stop()
+	log.Println("shutting down gracefully, press Ctrl+C again to force")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server forced to shutdown: ", err)
+	}
+
+	log.Println("Server exiting")
 }

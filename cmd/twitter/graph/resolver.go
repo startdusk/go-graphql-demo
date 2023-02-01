@@ -12,7 +12,8 @@ import (
 )
 
 type Resolver struct {
-	AuthService data.AuthService
+	AuthService  data.AuthService
+	TweetService data.TweetService
 }
 
 type queryResolver struct {
@@ -37,6 +38,16 @@ func writeBadRequestError(ctx context.Context, err error) error {
 		Path:    graphql.GetPath(ctx),
 		Extensions: map[string]any{
 			"code": http.StatusBadRequest,
+		},
+	}
+}
+
+func writeUnauthenticatedError(ctx context.Context, err error) error {
+	return &gqlerror.Error{
+		Message: err.Error(),
+		Path:    graphql.GetPath(ctx),
+		Extensions: map[string]any{
+			"code": http.StatusUnauthorized,
 		},
 	}
 }

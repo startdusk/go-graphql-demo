@@ -11,6 +11,10 @@ type AuthResponse struct {
 	User        *User  `json:"user"`
 }
 
+type CreatedTweetInput struct {
+	Body string `json:"body"`
+}
+
 type LoginInput struct {
 	UsernameOrEmail string `json:"usernameOrEmail"`
 	Password        string `json:"password"`
@@ -21,6 +25,13 @@ type RegisterInput struct {
 	Email           string `json:"email"`
 	Password        string `json:"password"`
 	ConfirmPassword string `json:"confirmPassword"`
+}
+
+type Tweet struct {
+	ID        string    `json:"id"`
+	Body      string    `json:"body"`
+	UserID    string    `json:"userId"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type User struct {

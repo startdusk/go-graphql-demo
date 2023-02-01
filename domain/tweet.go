@@ -17,10 +17,6 @@ func NewTweetService(tr data.TweetRepo) *TweetService {
 }
 
 func (ts *TweetService) All(ctx context.Context) ([]data.Tweet, error) {
-	_, err := shared.GetUserIDFromContext(ctx)
-	if err != nil {
-		return nil, data.ErrUnauthenticated
-	}
 	return ts.tweetRepo.All(ctx)
 }
 
