@@ -47,3 +47,11 @@ func (tr *TweetRepo) GetByID(ctx context.Context, tweetID string) (data.Tweet, e
 	}
 	return t, nil
 }
+
+func (tr *TweetRepo) Delete(ctx context.Context, tweetID string) error {
+	const q = `
+		DELETE FROM tweets WHERE id = $1
+	`
+	_, err := tr.DB.Pool.Exec(ctx, q, tweetID)
+	return err
+}

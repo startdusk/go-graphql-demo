@@ -58,6 +58,20 @@ func (_m *TweetService) Create(ctx context.Context, input data.CreateTweetInput)
 	return r0, r1
 }
 
+// Delete provides a mock function with given fields: ctx, tweetID
+func (_m *TweetService) Delete(ctx context.Context, tweetID string) error {
+	ret := _m.Called(ctx, tweetID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, tweetID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetByID provides a mock function with given fields: ctx, id
 func (_m *TweetService) GetByID(ctx context.Context, id string) (data.Tweet, error) {
 	ret := _m.Called(ctx, id)

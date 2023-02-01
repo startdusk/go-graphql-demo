@@ -14,6 +14,29 @@ type MutationResolver struct {
 	mock.Mock
 }
 
+// CreateTweet provides a mock function with given fields: ctx, input
+func (_m *MutationResolver) CreateTweet(ctx context.Context, input graph.CreatedTweetInput) (*graph.Tweet, error) {
+	ret := _m.Called(ctx, input)
+
+	var r0 *graph.Tweet
+	if rf, ok := ret.Get(0).(func(context.Context, graph.CreatedTweetInput) *graph.Tweet); ok {
+		r0 = rf(ctx, input)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*graph.Tweet)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, graph.CreatedTweetInput) error); ok {
+		r1 = rf(ctx, input)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Login provides a mock function with given fields: ctx, input
 func (_m *MutationResolver) Login(ctx context.Context, input graph.LoginInput) (*graph.AuthResponse, error) {
 	ret := _m.Called(ctx, input)

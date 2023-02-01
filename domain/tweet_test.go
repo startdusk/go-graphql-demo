@@ -21,24 +21,10 @@ func TestTweetService_All(t *testing.T) {
 		}}
 		tweetRepo.On("All", mock.Anything, mock.Anything).Return(returnTweets, nil)
 		tr := NewTweetService(&tweetRepo)
-
-		ctx := context.WithValue(context.Background(), shared.UserIDKey{}, "user_id")
+		ctx := context.Background()
 		tweet, err := tr.All(ctx)
 		assert.NoError(t, err)
 		assert.Equal(t, tweet, returnTweets)
-	})
-
-	t.Run("no auth user cannot get all tweets", func(t *testing.T) {
-		var tweetRepo mocks.TweetRepo
-		tr := NewTweetService(&tweetRepo)
-
-		ctx := context.Background()
-		tweet, err := tr.All(ctx)
-		assert.ErrorIs(t, err, data.ErrUnauthenticated)
-		assert.Nil(t, tweet)
-
-		tweetRepo.AssertNotCalled(t, "All")
-		tweetRepo.AssertExpectations(t)
 	})
 }
 
@@ -86,7 +72,7 @@ func TestTweetService_GetByID(t *testing.T) {
 			Body:   "hello",
 			UserID: "user_id",
 		}
-		tweetRepo.On("GetByID", mock.Anything, mock.Anything, mock.Anything).Return(returnTweet, nil)
+		tweetRepo.On("GetByID", mock.Anything, mock.Anything).Return(returnTweet, nil)
 		tr := NewTweetService(&tweetRepo)
 
 		ctx := context.WithValue(context.Background(), shared.UserIDKey{}, "user_id")
@@ -106,6 +92,32 @@ func TestTweetService_GetByID(t *testing.T) {
 		assert.Equal(t, tweet, data.NilTweet)
 
 		tweetRepo.AssertNotCalled(t, "GetByID")
+		tweetRepo.AssertExpectations(t)
+	})
+}
+
+func TestTweetService_Delete(t *testing.T) {
+	t.Run("can delete tweet", func(t *testing.T) {
+		var tweetRepo mocks.TweetRepo
+		tweetID := "3d73c595-b771-4be1-9328-82e1cb93b350"
+		tweetRepo.On("Delete", mock.Anything, mock.Anything).Return(nil)
+		tr := NewTweetService(&tweetRepo)
+
+		ctx := context.WithValue(context.Background(), shared.UserIDKey{}, "user_id")
+		err := tr.Delete(ctx, tweetID)
+		assert.NoError(t, err)
+	})
+
+	t.Run("invalid tweet id", func(t *testing.T) {
+		var tweetRepo mocks.TweetRepo
+		tweetID := "xxx"
+		tr := NewTweetService(&tweetRepo)
+
+		ctx := context.WithValue(context.Background(), shared.UserIDKey{}, "user_id")
+		err := tr.Delete(ctx, tweetID)
+		assert.ErrorIs(t, err, data.ErrInvalidUUID)
+
+		tweetRepo.AssertNotCalled(t, "Delete")
 		tweetRepo.AssertExpectations(t)
 	})
 }

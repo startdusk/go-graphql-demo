@@ -45,10 +45,12 @@ type TweetService interface {
 	All(ctx context.Context) ([]Tweet, error)
 	Create(ctx context.Context, input CreateTweetInput) (Tweet, error)
 	GetByID(ctx context.Context, id string) (Tweet, error)
+	Delete(ctx context.Context, tweetID string) error
 }
 
 type TweetRepo interface {
 	All(ctx context.Context) ([]Tweet, error)
 	Create(ctx context.Context, tweet Tweet) (Tweet, error)
 	GetByID(ctx context.Context, tweetID string) (Tweet, error)
+	Delete(ctx context.Context, tweetID string) error
 }

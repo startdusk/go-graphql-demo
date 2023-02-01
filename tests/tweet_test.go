@@ -90,6 +90,12 @@ func TestTweetService_Lifecycle(t *testing.T) {
 				return tweetService.GetByID(ctx, initTweet.ID)
 			},
 		},
+		{
+			name: "can delete tweet",
+			op: func() (data.Tweet, error) {
+				return data.NilTweet, tweetService.Delete(ctx, initTweet.ID)
+			},
+		},
 	}
 
 	for _, cc := range cases {
@@ -108,5 +114,5 @@ func TestTweetService_Lifecycle(t *testing.T) {
 
 	tweets, err := tweetService.All(ctx)
 	assert.NoError(t, err)
-	assert.Equal(t, len(tweets), 3)
+	assert.Equal(t, len(tweets), 2)
 }

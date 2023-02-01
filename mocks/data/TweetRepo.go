@@ -58,6 +58,20 @@ func (_m *TweetRepo) Create(ctx context.Context, tweet data.Tweet) (data.Tweet, 
 	return r0, r1
 }
 
+// Delete provides a mock function with given fields: ctx, tweetID
+func (_m *TweetRepo) Delete(ctx context.Context, tweetID string) error {
+	ret := _m.Called(ctx, tweetID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, tweetID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetByID provides a mock function with given fields: ctx, tweetID
 func (_m *TweetRepo) GetByID(ctx context.Context, tweetID string) (data.Tweet, error) {
 	ret := _m.Called(ctx, tweetID)
