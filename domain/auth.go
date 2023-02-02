@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/startdusk/twitter/data"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,12 +17,14 @@ var enctyptPasswordCost = bcrypt.DefaultCost
 type AuthService struct {
 	authTokenService data.AuthTokenService
 	userRepo         data.UserRepo
+	refreshTokenRepo data.RefreshTokenRepo
 }
 
-func NewAuthService(ur data.UserRepo, ats data.AuthTokenService) *AuthService {
+func NewAuthService(ur data.UserRepo, ats data.AuthTokenService, rtr data.RefreshTokenRepo) *AuthService {
 	return &AuthService{
 		authTokenService: ats,
 		userRepo:         ur,
+		refreshTokenRepo: rtr,
 	}
 }
 
@@ -66,15 +70,25 @@ func (as *AuthService) Register(ctx context.Context, input data.RegisterInput) (
 		return data.NilAuthResponse, data.ErrGenAccessToken
 	}
 
-	// refreshToken, err := as.authTokenService.CreateRefreshToken(ctx, user)
-	// if err != nil {
-	// 	log.Printf("%+v", err)
-	// 	return data.NilAuthResponse, data.ErrGenRefreshToken
-	// }
+	tokenID := uuid.NewString()
+	refreshToken, expiredAt, err := as.authTokenService.CreateRefreshToken(ctx, user, tokenID)
+	if err != nil {
+		log.Printf("%+v", err)
+		return data.NilAuthResponse, data.ErrGenRefreshToken
+	}
+	if _, err := as.refreshTokenRepo.Create(ctx, data.CreateRefreshTokenParams{
+		Sub:       user.ID,
+		TokenID:   tokenID,
+		ExpiredAt: expiredAt,
+	}); err != nil {
+		log.Printf("%+v", err)
+		return data.NilAuthResponse, data.ErrCreateSession
+	}
 
 	return data.AuthResponse{
-		AccessToken: accessToken,
-		User:        user,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		User:         user,
 	}, err
 }
 
@@ -112,15 +126,65 @@ func (as *AuthService) Login(ctx context.Context, input data.LoginInput) (data.A
 		return data.NilAuthResponse, data.ErrGenAccessToken
 	}
 
-	// refreshToken, err := as.authTokenService.CreateRefreshToken(ctx, user, )
-	// if err != nil {
-	// 	log.Printf("%+v", err)
-	// 	return data.NilAuthResponse, data.ErrGenRefreshToken
-	// }
+	tokenID := uuid.NewString()
+	refreshToken, expiredAt, err := as.authTokenService.CreateRefreshToken(ctx, user, tokenID)
+	if err != nil {
+		log.Printf("%+v", err)
+		return data.NilAuthResponse, data.ErrGenRefreshToken
+	}
+	if _, err := as.refreshTokenRepo.Create(ctx, data.CreateRefreshTokenParams{
+		Sub:       user.ID,
+		TokenID:   tokenID,
+		ExpiredAt: expiredAt,
+	}); err != nil {
+		log.Printf("%+v", err)
+		return data.NilAuthResponse, data.ErrCreateSession
+	}
 
 	return data.AuthResponse{
-		AccessToken: accessToken,
-		// RefreshToken: refreshToken,
-		User: user,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		User:         user,
+	}, err
+}
+
+func (as *AuthService) RefreshToken(ctx context.Context, token string) (data.AuthResponse, error) {
+	authToken, err := as.authTokenService.ParseToken(ctx, token)
+	if err != nil {
+		return data.NilAuthResponse, data.ErrBadCredentials
+	}
+
+	refreshToken, err := as.refreshTokenRepo.GetByTokenID(ctx, authToken.ID)
+	if err != nil {
+		return data.NilAuthResponse, data.ErrBadCredentials
+	}
+	if refreshToken.ExpiredAt.Before(time.Now()) {
+		return data.NilAuthResponse, data.ErrRefreshTokenExpired
+	}
+
+	go func() {
+		err := as.refreshTokenRepo.LastUsed(context.Background(), data.CreateRefreshTokenParams{
+			Sub:     refreshToken.UserID,
+			TokenID: refreshToken.TokenID,
+		})
+		if err != nil {
+			log.Printf("log session[%s] last used error: %+v\n", refreshToken.TokenID, err)
+		}
+	}()
+
+	user := data.User{
+		ID: refreshToken.UserID,
+	}
+	accessToken, err := as.authTokenService.CreateAccessToken(ctx, user)
+	if err != nil {
+		return data.NilAuthResponse, data.ErrGenAccessToken
+	}
+
+	// TODO: gen refresh token ?
+
+	return data.AuthResponse{
+		AccessToken:  accessToken,
+		RefreshToken: token,
+		User:         user,
 	}, err
 }

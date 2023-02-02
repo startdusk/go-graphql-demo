@@ -25,7 +25,8 @@ func (m *mutationResolver) Register(ctx context.Context, input RegisterInput) (*
 		}
 	}
 	return &AuthResponse{
-		AccessToken: resp.AccessToken,
+		AccessToken:  resp.AccessToken,
+		RefreshToken: resp.RefreshToken,
 		User: &User{
 			ID:        resp.User.ID,
 			Username:  resp.User.Username,
@@ -51,7 +52,8 @@ func (m *mutationResolver) Login(ctx context.Context, input LoginInput) (*AuthRe
 	}
 
 	return &AuthResponse{
-		AccessToken: resp.AccessToken,
+		AccessToken:  resp.AccessToken,
+		RefreshToken: resp.RefreshToken,
 		User: &User{
 			ID:        resp.User.ID,
 			Username:  resp.User.Username,

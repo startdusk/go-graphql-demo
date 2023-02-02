@@ -11,20 +11,23 @@ var (
 )
 
 type RefreshToken struct {
-	ID         string
-	Name       string
+	ID         int64
+	TokenID    string
 	UserID     string
 	LastUsedAt time.Time
-	ExpiredAt  time.Time
 	CreatedAt  time.Time
+	ExpiredAt  time.Time
 }
 
 type CreateRefreshTokenParams struct {
-	Sub  string
-	Name string
+	Sub       string
+	TokenID   string
+	ExpiredAt time.Time
 }
 
 type RefreshTokenRepo interface {
 	Create(ctx context.Context, params CreateRefreshTokenParams) (RefreshToken, error)
-	GetByID(ctx context.Context, id string) (RefreshToken, error)
+	LastUsed(ctx context.Context, params CreateRefreshTokenParams) error
+	GetByTokenID(ctx context.Context, tokenID string) (RefreshToken, error)
+	Delete(ctx context.Context, tokenID string) error
 }

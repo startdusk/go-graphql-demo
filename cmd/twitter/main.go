@@ -37,6 +37,7 @@ func main() {
 
 	userRepo := postgres.UserRepo{DB: db}
 	twetRepo := postgres.TweetRepo{DB: db}
+	refreshTokenRepo := postgres.RefreshTokenRepo{DB: db}
 	tokenService := jwt.NewTokenService(&conf.JWT)
 	router := gin.New()
 	router.Use(gin.Logger())
@@ -52,7 +53,7 @@ func main() {
 	router.POST("/query", func(ctx *gin.Context) {
 		handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
 			Resolvers: &graph.Resolver{
-				AuthService:  domain.NewAuthService(&userRepo, tokenService),
+				AuthService:  domain.NewAuthService(&userRepo, tokenService, &refreshTokenRepo),
 				TweetService: domain.NewTweetService(&twetRepo),
 				UserService:  domain.NewUserService(&userRepo),
 			},

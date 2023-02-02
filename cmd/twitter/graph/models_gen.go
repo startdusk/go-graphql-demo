@@ -7,8 +7,9 @@ import (
 )
 
 type AuthResponse struct {
-	AccessToken string `json:"accessToken"`
-	User        *User  `json:"user"`
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+	User         *User  `json:"user"`
 }
 
 type CreatedTweetInput struct {
@@ -18,6 +19,10 @@ type CreatedTweetInput struct {
 type LoginInput struct {
 	UsernameOrEmail string `json:"usernameOrEmail"`
 	Password        string `json:"password"`
+}
+
+type RefreshTokenInput struct {
+	Token string `json:"token"`
 }
 
 type RegisterInput struct {

@@ -72,9 +72,12 @@ func TestMain(m *testing.M) {
 	tweetRepo := &postgres.TweetRepo{
 		DB: db,
 	}
+	refreshTokenRepo := &postgres.RefreshTokenRepo{
+		DB: db,
+	}
 
 	authTokenService := jwt.NewTokenService(&conf.JWT)
-	authService = domain.NewAuthService(userRepo, authTokenService)
+	authService = domain.NewAuthService(userRepo, authTokenService, refreshTokenRepo)
 	tweetService = domain.NewTweetService(tweetRepo)
 	m.Run()
 }

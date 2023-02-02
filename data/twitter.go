@@ -13,4 +13,7 @@ var (
 	ErrUnauthenticated   = errors.New("unauthenticated")
 	ErrInvalidUUID       = errors.New("invalid uuid")
 	ErrForbidden         = errors.New("forbidden")
+	ErrCreateSession     = errors.New("session error")
+
+	ErrRefreshTokenExpired = errors.New("refresh token expired")
 )

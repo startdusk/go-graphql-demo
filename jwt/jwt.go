@@ -57,7 +57,7 @@ func (ts *TokenService) ParseToken(ctx context.Context, payload string) (data.Au
 	}, nil
 }
 
-func (ts *TokenService) CreateRefreshToken(ctx context.Context, user data.User, tokenID string) (string, error) {
+func (ts *TokenService) CreateRefreshToken(ctx context.Context, user data.User, tokenID string) (string, time.Time, error) {
 	now := nowFunc()
 	// Build a JWT!
 	tok, err := jwt.NewBuilder().
@@ -68,15 +68,15 @@ func (ts *TokenService) CreateRefreshToken(ctx context.Context, user data.User, 
 		Expiration(now.Add(data.RefreshTokenLifetime)).
 		Build()
 	if err != nil {
-		return "", errors.Wrap(err, "failed to build refresh token")
+		return "", time.Time{}, errors.Wrap(err, "failed to build refresh token")
 	}
 
 	// Sign a JWT!
 	signed, err := jwt.Sign(tok, jwt.WithKey(signatureType, []byte(ts.Config.Secret)))
 	if err != nil {
-		return "", errors.Wrap(err, "failed to sign refresh token")
+		return "", time.Time{}, errors.Wrap(err, "failed to sign refresh token")
 	}
-	return string(signed), nil
+	return string(signed), tok.Expiration(), nil
 }
 
 func (ts *TokenService) CreateAccessToken(ctx context.Context, user data.User) (string, error) {

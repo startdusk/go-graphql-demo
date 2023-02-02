@@ -7,6 +7,7 @@ import (
 	"net/mail"
 	"regexp"
 	"strings"
+	"time"
 )
 
 var (
@@ -30,7 +31,7 @@ type AuthResponse struct {
 }
 
 type AuthTokenService interface {
-	CreateRefreshToken(ctx context.Context, user User, tokenID string) (string, error)
+	CreateRefreshToken(ctx context.Context, user User, tokenID string) (string, time.Time, error)
 	CreateAccessToken(ctx context.Context, user User) (string, error)
 	ParseTokenFromRequest(ctx context.Context, r *http.Request) (AuthToken, error)
 	ParseToken(ctx context.Context, payload string) (AuthToken, error)
@@ -39,6 +40,7 @@ type AuthTokenService interface {
 type AuthService interface {
 	Register(ctx context.Context, input RegisterInput) (AuthResponse, error)
 	Login(ctx context.Context, input LoginInput) (AuthResponse, error)
+	RefreshToken(ctx context.Context, token string) (AuthResponse, error)
 }
 
 type RegisterInput struct {

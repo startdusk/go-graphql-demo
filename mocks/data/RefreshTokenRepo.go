@@ -35,25 +35,53 @@ func (_m *RefreshTokenRepo) Create(ctx context.Context, params data.CreateRefres
 	return r0, r1
 }
 
-// GetByID provides a mock function with given fields: ctx, id
-func (_m *RefreshTokenRepo) GetByID(ctx context.Context, id string) (data.RefreshToken, error) {
-	ret := _m.Called(ctx, id)
+// Delete provides a mock function with given fields: ctx, tokenID
+func (_m *RefreshTokenRepo) Delete(ctx context.Context, tokenID string) error {
+	ret := _m.Called(ctx, tokenID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, tokenID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// GetByTokenID provides a mock function with given fields: ctx, tokenID
+func (_m *RefreshTokenRepo) GetByTokenID(ctx context.Context, tokenID string) (data.RefreshToken, error) {
+	ret := _m.Called(ctx, tokenID)
 
 	var r0 data.RefreshToken
 	if rf, ok := ret.Get(0).(func(context.Context, string) data.RefreshToken); ok {
-		r0 = rf(ctx, id)
+		r0 = rf(ctx, tokenID)
 	} else {
 		r0 = ret.Get(0).(data.RefreshToken)
 	}
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, id)
+		r1 = rf(ctx, tokenID)
 	} else {
 		r1 = ret.Error(1)
 	}
 
 	return r0, r1
+}
+
+// LastUsed provides a mock function with given fields: ctx, params
+func (_m *RefreshTokenRepo) LastUsed(ctx context.Context, params data.CreateRefreshTokenParams) error {
+	ret := _m.Called(ctx, params)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, data.CreateRefreshTokenParams) error); ok {
+		r0 = rf(ctx, params)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 type mockConstructorTestingTNewRefreshTokenRepo interface {

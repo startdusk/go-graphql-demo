@@ -18,6 +18,7 @@ type Tweet {
 
 type AuthResponse {
   accessToken: String!
+  refreshToken: String!
   user: User!
 }
 
@@ -37,6 +38,10 @@ input CreatedTweetInput {
   body: String!
 }
 
+input RefreshTokenInput {
+  token: String!
+}
+
 type Query {
   me: User
   tweets: [Tweet!]!
@@ -48,4 +53,5 @@ type Mutation {
   createTweet(input: CreatedTweetInput!): Tweet!
   createReply(parentId: ID!, input: CreatedTweetInput!): Tweet!
   deleteTweet(id: ID!): Boolean!
+  refreshToken(input: RefreshTokenInput!): AuthResponse!
 }

@@ -72,7 +72,7 @@ func TestTokenService_CreateAndParseRefreshToken(t *testing.T) {
 	t.Run("can create refresh token", func(t *testing.T) {
 		ctx := context.Background()
 		tokenID := "token_id"
-		refreshToken, err := authTokenService.CreateRefreshToken(ctx, data.User{
+		refreshToken, _, err := authTokenService.CreateRefreshToken(ctx, data.User{
 			ID: "user_id",
 		}, tokenID)
 		assert.NoError(t, err)
@@ -106,7 +106,7 @@ func TestTokenService_ParseFromRequest(t *testing.T) {
 	t.Run("can parse refresh token from request", func(t *testing.T) {
 		ctx := context.Background()
 		tokenID := "token_id"
-		refreshToken, err := authTokenService.CreateRefreshToken(ctx, data.User{
+		refreshToken, _, err := authTokenService.CreateRefreshToken(ctx, data.User{
 			ID: "user_id",
 		}, tokenID)
 		assert.NoError(t, err)
